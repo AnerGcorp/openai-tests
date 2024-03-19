@@ -8,11 +8,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # initializing Chat
-chat = ChatOpenAI()
+chat = ChatOpenAI(verbose=True)
 
 # initializing memory
 memory = ConversationBufferMemory(
-    chat_memory=FileChatMessageHistory("messages.json"),
+    # chat_memory=FileChatMessageHistory("messages.json"),
     memory_key="messages",
     return_messages=True
 )
@@ -30,12 +30,13 @@ prompt = ChatPromptTemplate(
 chain = LLMChain(
     llm=chat,
     prompt=prompt,
-    memory=memory
+    memory=memory,
+    verbose=True
 )
 
 while True:
     content = input(">> ")
-
+    # calling 
     result = chain.invoke({"content": content})
 
     print(result["text"])
