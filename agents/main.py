@@ -5,6 +5,7 @@ from langchain.prompts import (
     MessagesPlaceholder
 )
 from langchain.schema import SystemMessage
+from langchain.memory import ConversationBufferMemory
 from langchain.agents import OpenAIFunctionsAgent, AgentExecutor
 from dotenv import load_dotenv
 
@@ -24,10 +25,13 @@ prompt = ChatPromptTemplate(
             "Do not make any assumptions what tables exist "
             "or what columns exist. Instead use the 'describe_tables' function"
         )),
+        MessagesPlaceholder(variable_name="chat_history"),
         HumanMessagePromptTemplate.from_template("{input}"),
         MessagesPlaceholder(variable_name="agent_scratchpad")
     ]
 )
+
+memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
 tools = [
     run_query_tool, 
@@ -44,7 +48,10 @@ agent = OpenAIFunctionsAgent(
 agent_executor = AgentExecutor(
     agent=agent,
     verbose=True,
-    tools=tools
+    tools=tools,
+    memory=memory
 )
 
-agent_executor.invoke("Summarize most 5 top popular products? Write results to report file. ")
+agent_executor.invoke("How many orders are there? Write results to report file. ")
+
+agent_executor.invoke("Repeat the exact same process for users.")
