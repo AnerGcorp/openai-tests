@@ -1,11 +1,12 @@
+from langchain_openai import OpenAIEmbeddings
 from langchain_community.document_loaders.text import TextLoader
-from langchain.text_splitter import CharacterTextSplitter
-from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_text_splitters import CharacterTextSplitter
+from langchain_community.vectorstores.chroma import Chroma
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# initializing Openai embeddings
 embeddings = OpenAIEmbeddings()
 
 text_splitter = CharacterTextSplitter(
@@ -19,6 +20,16 @@ docs = loader.load_and_split(
     text_splitter=text_splitter
 )
 
-for doc in docs:
-    print(doc.page_content)
+db = Chroma.from_documents(
+    documents=docs,
+    embedding=embeddings,
+    persist_directory="emb"
+)
+
+results = db.similarity_search(
+    "What is an interesting fact about the English language?"
+)
+
+for result in results:
     print("\n")
+    print(result.page_content)
