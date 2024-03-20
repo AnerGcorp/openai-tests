@@ -8,7 +8,7 @@ from langchain.schema import SystemMessage
 from langchain.agents import OpenAIFunctionsAgent, AgentExecutor
 from dotenv import load_dotenv
 
-from tools.sql import run_query_tool, list_tables
+from tools.sql import run_query_tool, list_tables, describe_tables_tool
 
 load_dotenv()
 
@@ -17,13 +17,18 @@ chat = ChatOpenAI()
 
 prompt = ChatPromptTemplate(
     messages=[
-        SystemMessage(content=f"You are an AI that has access to a SQLite database. \n{tables}"),
+        SystemMessage(content=(
+            "You are an AI that has access to a SQLite database.  \n"
+            f"The database has tables of: {tables}\n"
+            "Do not make any assumptions what tables exist "
+            "or what columns exist. Instead use the 'describe_tables' function"
+        )),
         HumanMessagePromptTemplate.from_template("{input}"),
         MessagesPlaceholder(variable_name="agent_scratchpad")
     ]
 )
 
-tools = [run_query_tool]
+tools = [run_query_tool, describe_tables_tool]
 
 agent = OpenAIFunctionsAgent(
     llm=chat,
